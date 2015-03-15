@@ -1,5 +1,7 @@
 $fn=100;
 
+// All units in mm
+
 pt=0.35;
 thickness=2.45;
 
@@ -22,6 +24,8 @@ syphon_tube_outer_d=12;
 syphon_tube_inner_d=9.5;
 // stg_d=2.3; // This will be friction tight to the point where removal becomes impossile
 stg_d=2.1;
+
+lid_hole_d=34;
 
 module rounded_square(dim, corners=[10,10,10,10], center=false)
 {
@@ -342,6 +346,7 @@ module lid()
 	{
 		translate([0,0,51])scale([1.0015,1.0015,1])shape();
 		translate([0,0,box_height+51/2+5])cube(size=[box_width+5,box_width+5,box_height],center=true);
+		translate([0,0,box_height/2])cylinder(d=lid_hole_d,h=box_height);
 	}
 
 	$difference()
@@ -354,7 +359,8 @@ module lid()
 			[8,8,8,8], true);
 	}
 
-	translate([-30,-30,box_height+knob_h/2-2])linear_extrude(height=knob_h,center=true)import("seedstack-lid-handle.dxf");
+
+	//translate([-30,-30,box_height+knob_h/2-2])linear_extrude(height=knob_h,center=true)import("seedstack-lid-handle.dxf");
 	translate([-42,-53,box_height])linear_extrude(height=thickness,center=true)import("seedstack-lid-text.dxf");
 
 }
@@ -370,16 +376,22 @@ module bottom()
 	}
 }
 
-module brim()
+module brim(small=0)
 {
 	tr=box_width/2-10;
 	color("red")
+	{
+	if(small==0)
 	{
 	translate([tr,tr,0])cylinder(r=30,h=0.2,center=true);
 	translate([tr,-tr,0])cylinder(r=30,h=0.2,center=true);
 	translate([-tr,tr,0])cylinder(r=30,h=0.2,center=true);
 	translate([-tr,-tr,0])cylinder(r=30,h=0.2,center=true);
-	cube(size=[box_width+10,box_width+10,0.2],center=true);
+	}
+	//cube(size=[box_width+10,box_width+10,0.2],center=true);
+	linear_extrude(height=0.35)rounded_square(
+		[box_width+10,box_width+10],
+		[15,15,15,15], true);
 	difference()
 	{
 		linear_extrude(height=10)rounded_square(
@@ -392,9 +404,31 @@ module brim()
 	}
 }
 
+module camlid()
+{
+	lid();
+
+	difference()
+	{
+		difference()
+		{
+			translate([0,0,box_height-4])brim(small=1);
+			translate([0,0,box_height+7.5])cube(size=[150,150,10],center=true);
+		}
+		translate([0,0,box_height-4])linear_extrude(height=5)rounded_square(
+			[box_width-thickness+pt+0.05,box_width-thickness+pt+0.05],
+			[14.1,14.1,14.1,14.1], true);
+
+
+	}
+}
+
+// Select a module to render
+
 //lid();
-container();
+camlid();
+//container();
 //bottom();
 //grid();
 //translate([-box_width/2+thickness+drain_p,box_width/2-thickness-drain_p,0])syphon();
-brim();
+//brim();
